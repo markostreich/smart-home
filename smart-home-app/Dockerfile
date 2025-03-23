@@ -1,5 +1,7 @@
 # --- Build Stage ---
 FROM node:22-alpine AS builder
+# Upgrade npm
+RUN npm install -g npm@latest
 
 WORKDIR /app
 
