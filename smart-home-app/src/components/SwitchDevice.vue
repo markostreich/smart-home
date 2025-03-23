@@ -22,7 +22,7 @@ const buttons = ref([]);
 const fetchButtons = async () => {
   try {
     const response = await axios.get("/api/buttons");
-    buttons.value = response.data; // expects [{ id, name }, ...]
+    buttons.value = response.data;
   } catch (error) {
     console.error("Error fetching buttons:", error);
   }
