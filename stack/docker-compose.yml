@@ -8,6 +8,13 @@ services:
     restart: always
     ports:
       - "8081:8080"
+        # Smart home API
+  smart-home-api:
+    image: markostreichde/smart-home-app:latest
+    container_name: smart-home-api
+    restart: always
+    ports:
+      - "8082:8080"
 
   # Update images continously
   watchtower:
