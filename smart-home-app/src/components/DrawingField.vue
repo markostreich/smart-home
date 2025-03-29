@@ -201,10 +201,7 @@ const postImage = () => {
     imageData: convertPixelDataToHex(),
     deviceName: "deviceOne",
   };
-  proxy?.$axios.post(
-    "http://localhost:8080/ledpanel/panelobject",
-    ledPanelObject
-  );
+  proxy?.$axios.post("/ledpanel/panelobject", ledPanelObject);
 };
 </script>
 
