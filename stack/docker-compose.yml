@@ -10,7 +10,7 @@ services:
       - "8081:8080"
   
   # Smart home APP
-  smart-home-api:
+  smart-home-app:
     image: markostreichde/smart-home-app:latest
     container_name: smart-home-app
     restart: always
