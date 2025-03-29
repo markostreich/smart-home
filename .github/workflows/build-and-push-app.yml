@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE: smart-home-api
+  DOCKER_IMAGE: smart-home-app
 
 jobs:
   build-and-push:
