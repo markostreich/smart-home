@@ -1,25 +1,39 @@
 <template>
-  <div>
-    <canvas
-      id="drawingCanvas"
-      @mousedown="startDrawing"
-      @mousemove="draw"
-      @mouseup="stopDrawing"
-      :width="width"
-      :height="height"
-    ></canvas>
-  </div>
-  <div>
-    <label for="colorInput">Set Color: </label>
-    <input type="color" id="colorInput" v-model="color" />
-  </div>
-  <div>
-    <label for="toggleGrid">Show Grid Pattern: </label>
-    <input type="checkbox" id="toggleGrid" checked v-model="isGrid" />
-  </div>
-  <div>
-    <button type="button" id="clearButton" @click="clearBoard">Clear</button>
-  </div>
+  <v-container class="pa-4">
+    <v-card>
+      <v-card-text>
+        <canvas
+          id="drawingCanvas"
+          @mousedown="startDrawing"
+          @mousemove="draw"
+          @mouseup="stopDrawing"
+          :width="width"
+          :height="height"
+        ></canvas>
+      </v-card-text>
+    </v-card>
+
+    <v-row class="mt-4" align="center" justify="space-between">
+      <v-col cols="12" md="4">
+        <v-color-picker
+          v-model="color"
+          hide-canvas
+          mode="hexa"
+          flat
+          show-swatches
+          swatches-max-height="100"
+        />
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-switch v-model="isGrid" label="Show Grid Pattern" inset />
+      </v-col>
+
+      <v-col cols="12" md="4" class="d-flex justify-center">
+        <v-btn color="red" variant="tonal" @click="clearBoard"> Clear </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -48,16 +62,15 @@ let pixelData: string[][] = Array.from({ length: CELL_AMOUNT_Y }, () =>
 const startDrawing = (event: MouseEvent) => {
   if (!context) return;
   isDrawing.value = true;
-  let x = event.clientX - (event.target as HTMLElement).offsetLeft;
-  let y = event.clientY - (event.target as HTMLElement).offsetTop;
-  //console.log("x:" + x + " y:" + y);
+  let x = event.offsetX;
+  let y = event.offsetY;
   _draw(x, y);
 };
 
 const draw = (event: MouseEvent) => {
   if (!isDrawing.value || !context) return;
-  let x = event.clientX - (event.target as HTMLElement).offsetLeft;
-  let y = event.clientY - (event.target as HTMLElement).offsetTop;
+  let x = event.offsetX;
+  let y = event.offsetY;
   _draw(x, y);
 };
 
@@ -101,7 +114,6 @@ const clearBoard = () => {
 onMounted(() => {
   initCanvas();
   drawBoard(context, width.value, height.value, CELL_AMOUNT_X, CELL_AMOUNT_Y);
-  color.value = "white";
   initPixelData();
 });
 
@@ -136,9 +148,6 @@ const convertPixelDataToHex = (): string => {
   return result;
 };
 
-/**
- * Inits canvas and drawing context.
- */
 const initCanvas = () => {
   canvas = document.getElementById("drawingCanvas") as HTMLCanvasElement;
   context = canvas.getContext("2d");
@@ -207,7 +216,9 @@ const postImage = () => {
 
 <style scoped>
 #drawingCanvas {
-  border: 1px solid #000;
+  border: 2px solid #444;
   cursor: cell;
+  display: block;
+  margin: 0 auto;
 }
 </style>

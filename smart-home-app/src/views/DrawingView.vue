@@ -1,17 +1,14 @@
 <template>
-  <div class="drawing">
-    <DrawingField />
-  </div>
+  <v-container class="pa-4">
+    <v-card>
+      <v-card-title>Drawing</v-card-title>
+      <v-card-text>
+        <DrawingField />
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
 import DrawingField from "@/components/DrawingField.vue";
-
-export default defineComponent({
-  name: "DrawingView",
-  components: {
-    DrawingField,
-  },
-});
 </script>

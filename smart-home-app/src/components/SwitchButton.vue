@@ -1,61 +1,54 @@
 <template>
-  <div class="switch-button">
-    <button :class="{ pressed: isPressed }" @click="togglePress">
+  <v-card class="pa-4">
+    <v-btn
+      :color="isPressed ? 'green' : 'primary'"
+      variant="flat"
+      @click="togglePress"
+      class="mb-3"
+    >
       {{ isPressed ? "Pressed" : "Press" }}
-    </button>
-    <div class="duration-field">
-      Duration:
-      <span>{{ duration ? duration + "s" : "not set" }}</span>
+    </v-btn>
+
+    <div class="mb-2">
+      <strong>Duration:</strong>
+      <span>{{ localDuration ? localDuration + "s" : "not set" }}</span>
     </div>
-    <input
+
+    <v-text-field
+      v-model.number="localDuration"
+      label="Set duration (seconds)"
       type="number"
-      v-model.number="duration"
-      placeholder="Set duration (seconds)"
       min="0"
+      density="compact"
+      hide-details
     />
-  </div>
+  </v-card>
 </template>
 
-<script setup>
-import { ref, onUnmounted, defineEmits } from "vue";
+<script setup lang="ts">
+import { defineProps, defineEmits, ref, watch } from "vue";
 
-const emit = defineEmits(["pressed", "unpressed"]);
+const props = defineProps<{
+  isPressed: boolean;
+  duration: number | null;
+}>();
 
-const isPressed = ref(false);
-const duration = ref(null);
-let timeoutHandle = null;
+const emit = defineEmits<{
+  (e: "pressed", duration: number | null): void;
+  (e: "unpressed"): void;
+}>();
+
+const localDuration = ref<number | null>(props.duration);
+
+// Sync if parent changes duration
+watch(
+  () => props.duration,
+  (newVal) => {
+    localDuration.value = newVal;
+  }
+);
 
 const togglePress = () => {
-  if (isPressed.value) {
-    unpressButton();
-  } else {
-    pressButton();
-  }
+  props.isPressed ? emit("unpressed") : emit("pressed", localDuration.value);
 };
-
-const pressButton = () => {
-  isPressed.value = true;
-  emit("pressed");
-  if (duration.value && duration.value > 0) {
-    clearTimeout(timeoutHandle);
-    timeoutHandle = setTimeout(unpressButton, duration.value * 1000);
-  }
-};
-
-const unpressButton = () => {
-  isPressed.value = false;
-  emit("unpressed");
-  clearTimeout(timeoutHandle);
-};
-
-onUnmounted(() => {
-  clearTimeout(timeoutHandle);
-});
 </script>
-
-<style scoped>
-.pressed {
-  background-color: green;
-  color: white;
-}
-</style>
