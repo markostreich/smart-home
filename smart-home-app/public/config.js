@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  apiHost: "http://localhost:8088",
+  apiHost: "http://localhost:8080",
 };

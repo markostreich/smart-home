@@ -13,3 +13,8 @@ spring:
   h2:
     console:
       enabled: true
+
+cors:
+	allowed-origins:
+		- http://localhost:3000
+		- http://localhost:8080
