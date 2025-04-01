@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from "vue";
+import { ref, onMounted, getCurrentInstance, watch } from "vue";
 
 const { proxy } = getCurrentInstance();
 
@@ -117,6 +117,12 @@ onMounted(() => {
   initPixelData();
 });
 
+watch(isGrid, () => {
+  if (!context) return;
+  drawBoard(context, width.value, height.value, CELL_AMOUNT_X, CELL_AMOUNT_Y);
+  drawPixelsFromData();
+});
+
 const initPixelData = () => {
   pixelData = Array.from({ length: CELL_AMOUNT_Y }, () =>
     Array.from({ length: CELL_AMOUNT_X }, () => "000000")
@@ -190,6 +196,26 @@ const drawGrid = (
     drawingContext.stroke();
   }
   color.value = "#ff0000";
+};
+
+const drawPixelsFromData = () => {
+  if (!context) return;
+  for (let y = 0; y < CELL_AMOUNT_Y; y++) {
+    for (let x = 0; x < CELL_AMOUNT_X; x++) {
+      const colorValue = pixelData[y][x];
+      if (colorValue !== "000000") {
+        const px = x * CELL_WIDTH;
+        const py = (CELL_AMOUNT_Y - 1 - y) * CELL_HEIGHT;
+        context.fillStyle = "#" + colorValue;
+        context.fillRect(
+          px + LINE_WIDTH,
+          py + LINE_WIDTH,
+          CELL_WIDTH - LINE_WIDTH - 1,
+          CELL_HEIGHT - LINE_WIDTH - 1
+        );
+      }
+    }
+  }
 };
 
 const pixelToHex = (x: number, y: number, color: string): string => {
