@@ -6,9 +6,13 @@
         @mousedown="startDrawing"
         @mousemove="draw"
         @mouseup="stopDrawing"
+        @mouseleave="stopDrawing"
+        @touchstart.passive="startTouch"
+        @touchmove.passive="moveTouch"
+        @touchend="endTouch"
         :width="width"
         :height="height"
-      ></canvas>
+      />
     </v-card>
 
     <v-row class="mt-4" align="center" justify="space-between">
@@ -92,6 +96,35 @@ const _draw = (x: number, y: number) => {
     CELL_HEIGHT - LINE_WIDTH - 1
   );
   context.fill();
+};
+
+const startTouch = (event: TouchEvent) => {
+  if (!context || !canvas) return;
+  event.preventDefault();
+  isDrawing.value = true;
+  const { x, y } = getTouchPos(event);
+  _draw(x, y);
+};
+
+const moveTouch = (event: TouchEvent) => {
+  if (!isDrawing.value || !context || !canvas) return;
+  event.preventDefault();
+  const { x, y } = getTouchPos(event);
+  _draw(x, y);
+};
+
+const endTouch = () => {
+  isDrawing.value = false;
+  postImage();
+};
+
+const getTouchPos = (event: TouchEvent) => {
+  const rect = canvas!.getBoundingClientRect();
+  const touch = event.touches[0] || event.changedTouches[0];
+  return {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top,
+  };
 };
 
 const getXInGrid = (x: number): number => {
