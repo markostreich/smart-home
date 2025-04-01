@@ -1,16 +1,14 @@
 <template>
   <v-container class="pa-4">
     <v-card>
-      <v-card-text>
-        <canvas
-          id="drawingCanvas"
-          @mousedown="startDrawing"
-          @mousemove="draw"
-          @mouseup="stopDrawing"
-          :width="width"
-          :height="height"
-        ></canvas>
-      </v-card-text>
+      <canvas
+        id="drawingCanvas"
+        @mousedown="startDrawing"
+        @mousemove="draw"
+        @mouseup="stopDrawing"
+        :width="width"
+        :height="height"
+      ></canvas>
     </v-card>
 
     <v-row class="mt-4" align="center" justify="space-between">
@@ -49,11 +47,11 @@ let canvas: HTMLCanvasElement | null = null;
 
 const CELL_AMOUNT_X = 16;
 const CELL_AMOUNT_Y = 16;
-const width = ref(400);
-const height = ref(400);
+const width = ref(275);
+const height = ref(275);
 const CELL_WIDTH = width.value / CELL_AMOUNT_X;
 const CELL_HEIGHT = height.value / CELL_AMOUNT_Y;
-const LINE_WIDTH = 1;
+const LINE_WIDTH = 0.1;
 
 let pixelData: string[][] = Array.from({ length: CELL_AMOUNT_Y }, () =>
   Array.from({ length: CELL_AMOUNT_X }, () => "000000")
