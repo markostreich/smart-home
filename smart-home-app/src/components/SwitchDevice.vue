@@ -84,7 +84,7 @@ const handlePress = async (
     await proxy?.$axios.post("/switch/object", {
       name,
       state,
-      duration: state ? duration : undefined,
+      duration,
       deviceName,
     });
 
