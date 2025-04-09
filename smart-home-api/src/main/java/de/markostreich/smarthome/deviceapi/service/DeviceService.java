@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import de.markostreich.smarthome.deviceapi.model.dto.DeviceDto;
 import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
 import de.markostreich.smarthome.leddeviceapi.model.LedPanelObject;
+import de.markostreich.smarthome.leddeviceapi.model.LedStripeObject;
 import de.markostreich.smarthome.leddeviceapi.model.repo.LedPanelObjectRepository;
 import de.markostreich.smarthome.leddeviceapi.model.repo.LedStripeObjectRepository;
 import de.markostreich.smarthome.switchdeviceapi.model.SwitchObject;
@@ -39,14 +40,12 @@ public class DeviceService {
 		deviceIterator.forEach(device -> {
 			log.info(device.toString());
 			val ledPanelObjects = ledPanelObjectRepository.findByDevice(device);
-			val ledStripeObject = ledStripeObjectRepository.findByDevice(device);
+			val ledStripeObjects = ledStripeObjectRepository.findByDevice(device);
 			val switchObjects = switchObjectRepository.findByDevice(device);
 			log.info(switchObjects.toString());
 			deviceDtos.add(new DeviceDto(device.getName(),
 					getLedPanelObjectName(ledPanelObjects),
-					Objects.nonNull(ledStripeObject)
-							? ledStripeObject.getName()
-							: "",
+					getLedStripeObjectName(ledStripeObjects),
 					getSwitchObjectName(switchObjects)));
 		});
 		return deviceDtos;
@@ -57,6 +56,14 @@ public class DeviceService {
 		if (Objects.isNull(ledPanelObjects))
 			return new HashSet<>();
 		return ledPanelObjects.parallelStream().map(LedPanelObject::getName)
+				.collect(Collectors.toSet());
+	}
+
+	private Set<String> getLedStripeObjectName(
+			final List<LedStripeObject> ledStripeObjects) {
+		if (Objects.isNull(ledStripeObjects))
+			return new HashSet<>();
+		return ledStripeObjects.parallelStream().map(LedStripeObject::getName)
 				.collect(Collectors.toSet());
 	}
 

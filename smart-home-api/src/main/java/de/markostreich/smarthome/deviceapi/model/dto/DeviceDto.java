@@ -5,6 +5,6 @@ import java.util.Set;
 public record DeviceDto(
 		String name,
 		Set<String> ledPanelObjects,
-		String ledStripeObject,
+		Set<String> ledStripeObjects,
 		Set<String> switchObjects) {
 }

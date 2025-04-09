@@ -40,14 +40,14 @@ public class LedStripeController {
 			log.warn("Could not find device '{}'", deviceName);
 			return ResponseEntity.notFound().build();
 		}
-		val ledStripeObject = ledStripeObjectRepository.findByDevice(ledDevice);
-		if (Objects.isNull(ledStripeObject)) {
+		val ledStripeObjectList = ledStripeObjectRepository.findByDevice(ledDevice);
+		if (ledStripeObjectList.isEmpty()) {
 			log.warn("Could not find led stripe data for device '{}'.",
 					deviceName);
 			return ResponseEntity.noContent().build();
 		}
 		log.info("Found data for device '{}':", deviceName);
-		log.info(ledStripeObject.toString());
+		val ledStripeObject = ledStripeObjectList.get(0);
 		return ResponseEntity.ok(new LedStripeObjectDto(
 				ledStripeObject.getName(), ledStripeObject.getMode().toString(),
 				ledStripeObject.getRed(), ledStripeObject.getGreen(),
@@ -63,8 +63,9 @@ public class LedStripeController {
 			log.warn("No device found with name '{}'.", objectDto.deviceName());
 			return ResponseEntity.noContent().build();
 		}
-		val existingLedStripeObject = device.getLedStripeObject();
-		if (Objects.nonNull(existingLedStripeObject)) {
+		val existingLedStripeObjectOptional = ledStripeObjectRepository.findByNameAndDevice(objectDto.name(), device);
+		if (existingLedStripeObjectOptional.isPresent()) {
+			val existingLedStripeObject = existingLedStripeObjectOptional.get();
 			existingLedStripeObject
 					.setMode(LedStripeMode.valueOf(objectDto.mode()));
 			existingLedStripeObject.setRed(objectDto.red());

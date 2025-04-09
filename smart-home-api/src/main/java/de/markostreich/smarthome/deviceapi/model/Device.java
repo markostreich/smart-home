@@ -13,8 +13,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,9 +38,8 @@ public class Device {
 	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
 	private Set<LedPanelObject> ledPanelObjects;
 
-	@OneToOne(mappedBy = "device")
-	@PrimaryKeyJoinColumn
-	private LedStripeObject ledStripeObject;
+	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
+	private Set<LedStripeObject> ledStripeObject;
 	
 	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
 	private Set<SwitchObject> switchObjects;
