@@ -49,6 +49,8 @@ watch(
 );
 
 const togglePress = () => {
-  props.isPressed ? emit("unpressed") : emit("pressed", localDuration.value);
+  props.isPressed
+    ? emit("unpressed", localDuration.value)
+    : emit("pressed", localDuration.value);
 };
 </script>
