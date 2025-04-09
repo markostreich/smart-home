@@ -35,12 +35,12 @@ public class Device {
 
 	private Timestamp lastLogin;
 
-	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<LedPanelObject> ledPanelObjects;
 
-	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
-	private Set<LedStripeObject> ledStripeObject;
+	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<LedStripeObject> ledStripeObjects;
 	
-	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<SwitchObject> switchObjects;
 }

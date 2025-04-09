@@ -7,7 +7,9 @@ import java.util.Objects;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,10 +55,20 @@ public class DeviceController {
 				.buildAndExpand(createdDevice.getName()).toUri();
 		return ResponseEntity.created(location).build();
 	}
-	
+
+	@DeleteMapping(path = "/{device}")
+	public ResponseEntity<String> deleteDevice(
+			@PathVariable(name = "device") final String deviceName) {
+		if (deviceService.deleteDevice(deviceName))
+			return ResponseEntity.ok(
+					"Device '" + deviceName + "' was deleted successfully.");
+		else
+			return ResponseEntity.notFound().build();
+	}
+
 	@GetMapping(path = "/list", produces = "application/json")
 	public ResponseEntity<List<DeviceDto>> getDevices() {
-        return ResponseEntity.ok(deviceService.getAllDevices());
+		return ResponseEntity.ok(deviceService.getAllDevices());
 	}
 
 }

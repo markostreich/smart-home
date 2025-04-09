@@ -40,7 +40,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, onMounted, onBeforeUnmount } from "vue";
+import {
+  defineProps,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  getCurrentInstance,
+} from "vue";
 import SwitchButton from "./SwitchButton.vue";
 import axios from "axios";
 
@@ -55,12 +61,16 @@ const props = defineProps<{
   deviceName: string;
 }>();
 
+const { proxy } = getCurrentInstance();
+
 const switchObjects = ref<SwitchObject[]>([]);
 let intervalHandle: number | null = null;
 
 const fetchButtons = async () => {
   try {
-    const response = await axios.get("/switch/update/" + props.deviceName);
+    const response = await proxy?.$axios.get(
+      "/switch/update/" + props.deviceName
+    );
     switchObjects.value = response.data;
   } catch (error) {
     console.error("Error fetching buttons:", error);
@@ -74,7 +84,7 @@ const handlePress = async (
   deviceName: string
 ) => {
   try {
-    await axios.post("/api/button-press", {
+    await proxy?.$axios.post("/switch/object", {
       name,
       state,
       duration: state ? duration : undefined,

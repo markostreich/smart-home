@@ -35,20 +35,27 @@ public class DeviceService {
 	@Transactional(readOnly = true)
 	public List<DeviceDto> getAllDevices() {
 		val deviceIterator = deviceRepository.findAll();
-		log.info(deviceIterator.toString());
+		log.debug(deviceIterator.toString());
 		val deviceDtos = new ArrayList<DeviceDto>();
 		deviceIterator.forEach(device -> {
-			log.info(device.toString());
 			val ledPanelObjects = ledPanelObjectRepository.findByDevice(device);
-			val ledStripeObjects = ledStripeObjectRepository.findByDevice(device);
+			val ledStripeObjects = ledStripeObjectRepository
+					.findByDevice(device);
 			val switchObjects = switchObjectRepository.findByDevice(device);
-			log.info(switchObjects.toString());
 			deviceDtos.add(new DeviceDto(device.getName(),
 					getLedPanelObjectName(ledPanelObjects),
 					getLedStripeObjectName(ledStripeObjects),
 					getSwitchObjectName(switchObjects)));
 		});
 		return deviceDtos;
+	}
+
+	public boolean deleteDevice(final String deviceName) {
+		val device = deviceRepository.findByName(deviceName);
+		if (Objects.isNull(device))
+			return false;
+		deviceRepository.delete(device);
+		return true;
 	}
 
 	private Set<String> getLedPanelObjectName(

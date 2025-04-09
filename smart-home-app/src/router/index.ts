@@ -8,6 +8,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import( "../views/DrawingView.vue"),
   },
+  {
+    path: "/switches",
+    name: "switches",
+    component: () =>
+      import( "../views/SwitchesView.vue"),
+  },
 ];
 
 const router = createRouter({

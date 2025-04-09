@@ -2,6 +2,9 @@ package de.markostreich.smarthome.switchdeviceapi.model;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import de.markostreich.smarthome.deviceapi.model.Device;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,5 +44,6 @@ public class SwitchObject {
 
 	@ManyToOne
 	@JoinColumn(name = "device_id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Device device;
 }
