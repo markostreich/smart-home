@@ -35,7 +35,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "pressed", duration: number | null): void;
-  (e: "unpressed"): void;
+  (e: "unpressed", duration: number | null): void;
 }>();
 
 const localDuration = ref<number | null>(props.duration);

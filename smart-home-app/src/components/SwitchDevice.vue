@@ -27,10 +27,7 @@
               :isPressed="switchObject.state"
               :duration="switchObject.duration"
               @pressed="(duration: number | null | undefined) => handlePress(switchObject.name, true, duration, props.deviceName)"
-              @unpressed="
-                () =>
-                  handlePress(switchObject.name, false, null, props.deviceName)
-              "
+              @unpressed="(duration: number | null | undefined) => handlePress(switchObject.name, false, duration, props.deviceName)"
             />
           </v-card-text>
         </v-card>
