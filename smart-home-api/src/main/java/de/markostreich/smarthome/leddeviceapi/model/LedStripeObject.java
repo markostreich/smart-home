@@ -27,6 +27,9 @@ public class LedStripeObject {
 	@Column(unique = true, nullable = false)
 	private UUID id;
 
+	@Column(nullable = false)
+	private String name;
+
 	private LedStripeMode mode;
 
 	private byte red;

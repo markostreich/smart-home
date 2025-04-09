@@ -2,7 +2,6 @@ package de.markostreich.smarthome.deviceapi;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +17,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import de.markostreich.smarthome.deviceapi.model.Device;
 import de.markostreich.smarthome.deviceapi.model.dto.DeviceDto;
 import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
+import de.markostreich.smarthome.deviceapi.service.DeviceService;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeviceController {
 
 	private final DeviceRepository deviceRepository;
+	private final DeviceService deviceService;
 
 	@PostMapping(path = "/connect", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<Object> connectDevice(
@@ -52,14 +53,10 @@ public class DeviceController {
 				.buildAndExpand(createdDevice.getName()).toUri();
 		return ResponseEntity.created(location).build();
 	}
-
+	
 	@GetMapping(path = "/list", produces = "application/json")
 	public ResponseEntity<List<DeviceDto>> getDevices() {
-		val deviceIterator = deviceRepository.findAll();
-		val deviceDtos = new ArrayList<DeviceDto>();
-		deviceIterator.forEach(
-				device -> deviceDtos.add(new DeviceDto(device.getName())));
-		return ResponseEntity.ok(deviceDtos);
+        return ResponseEntity.ok(deviceService.getAllDevices());
 	}
 
 }

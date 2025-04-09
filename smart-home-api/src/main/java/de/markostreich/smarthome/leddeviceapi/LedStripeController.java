@@ -32,7 +32,8 @@ public class LedStripeController {
 	private final DeviceRepository ledDeviceRepository;
 
 	@GetMapping(path = "/update/{device}", produces = "application/json")
-	public ResponseEntity<LedStripeObjectDto> update(@PathVariable(name = "device") final String deviceName) {
+	public ResponseEntity<LedStripeObjectDto> update(
+			@PathVariable(name = "device") final String deviceName) {
 		log.info("Searching data for '{}'...", deviceName);
 		val ledDevice = ledDeviceRepository.findByName(deviceName);
 		if (Objects.isNull(ledDevice)) {
@@ -41,18 +42,22 @@ public class LedStripeController {
 		}
 		val ledStripeObject = ledStripeObjectRepository.findByDevice(ledDevice);
 		if (Objects.isNull(ledStripeObject)) {
-			log.warn("Could not find led stripe data for device '{}'.", deviceName);
+			log.warn("Could not find led stripe data for device '{}'.",
+					deviceName);
 			return ResponseEntity.noContent().build();
 		}
 		log.info("Found data for device '{}':", deviceName);
 		log.info(ledStripeObject.toString());
-		return ResponseEntity.ok(new LedStripeObjectDto(ledStripeObject.getMode().toString(), ledStripeObject.getRed(),
-				ledStripeObject.getGreen(), ledStripeObject.getBlue(), ledStripeObject.getBrightness(),
+		return ResponseEntity.ok(new LedStripeObjectDto(
+				ledStripeObject.getName(), ledStripeObject.getMode().toString(),
+				ledStripeObject.getRed(), ledStripeObject.getGreen(),
+				ledStripeObject.getBlue(), ledStripeObject.getBrightness(),
 				ledStripeObject.getDevice().getName()));
 	}
 
 	@PostMapping(path = "/stripeobject", consumes = "application/json", produces = "application/json")
-	public ResponseEntity<Object> postLedStripeObject(@RequestBody final LedStripeObjectDto objectDto) {
+	public ResponseEntity<Object> postLedStripeObject(
+			@RequestBody final LedStripeObjectDto objectDto) {
 		val device = ledDeviceRepository.findByName(objectDto.deviceName());
 		if (Objects.isNull(device)) {
 			log.warn("No device found with name '{}'.", objectDto.deviceName());
@@ -60,7 +65,8 @@ public class LedStripeController {
 		}
 		val existingLedStripeObject = device.getLedStripeObject();
 		if (Objects.nonNull(existingLedStripeObject)) {
-			existingLedStripeObject.setMode(LedStripeMode.valueOf(objectDto.mode()));
+			existingLedStripeObject
+					.setMode(LedStripeMode.valueOf(objectDto.mode()));
 			existingLedStripeObject.setRed(objectDto.red());
 			existingLedStripeObject.setGreen(objectDto.green());
 			existingLedStripeObject.setBlue(objectDto.blue());
@@ -68,11 +74,14 @@ public class LedStripeController {
 			ledStripeObjectRepository.save(existingLedStripeObject);
 			return ResponseEntity.accepted().build();
 		}
-		var createdObject = LedStripeObject.builder().mode(LedStripeMode.valueOf(objectDto.mode())).red(objectDto.red())
-				.green(objectDto.green()).blue(objectDto.blue()).brightness(objectDto.brightness()).device(device)
-				.build();
+		var createdObject = LedStripeObject.builder()
+				.mode(LedStripeMode.valueOf(objectDto.mode()))
+				.red(objectDto.red()).green(objectDto.green())
+				.blue(objectDto.blue()).brightness(objectDto.brightness())
+				.device(device).build();
 		createdObject = ledStripeObjectRepository.save(createdObject);
-		val location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/update").path("/{device}")
+		val location = ServletUriComponentsBuilder.fromCurrentContextPath()
+				.path("/update").path("/{device}")
 				.buildAndExpand(createdObject.getDevice().getName()).toUri();
 		return ResponseEntity.created(location).build();
 	}
