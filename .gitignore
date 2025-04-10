@@ -1,5 +1,6 @@
 LocalLan.h
 ServerInfo.h
+RootCa.h
 Bruno/
 *.db
 
