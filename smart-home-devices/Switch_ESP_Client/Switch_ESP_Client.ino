@@ -3,7 +3,8 @@
 #include "JsonAdapter.h"
 #include "RestClient.h"
 
-constexpr const char* DEVICE_NAME = "Pumpe 1";
+constexpr const char* DEVICE_NAME = "Pumpe_1";
+
 const SwitchObject oregano = { "Oregano", false, 0, DEVICE_NAME };
 
 int i = 0;
@@ -17,4 +18,5 @@ void setup() {
 
 void loop() {
   delay(1000);
+  getUpdate(DEVICE_NAME);
 }

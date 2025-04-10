@@ -32,13 +32,11 @@ void connectClient(const char* clientId) {
   if (WiFi.status() == WL_CONNECTED) {
     WiFiClientSecure httpsClient;
     httpsClient.setCACert(root_ca);
-    Serial.println(root_ca);
 
     // For testing purposes, you can bypass SSL certificate verification (NOT recommended for production).
     //httpsClient.setInsecure();
 
     HTTPClient http;
-    Serial.println(connectApi);
     http.begin(httpsClient, connectApi);
     http.addHeader("Content-Type", "application/json");
 
@@ -71,7 +69,6 @@ void postSwitchObject(const String& switchObject) {
     // httpsClient.setInsecure();
 
     HTTPClient http;
-    Serial.println(postApi);
     http.begin(httpsClient, postApi);
     http.addHeader("Content-Type", "application/json");
 
