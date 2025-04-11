@@ -108,8 +108,6 @@ String getUpdate(const char* clientId) {
 
     if (httpResponseCode > 0) {
       json = http.getString();
-      Serial.println(httpResponseCode);
-      Serial.println(json);
     } else {
       Serial.print("Error on sending GET: ");
       Serial.println(httpResponseCode);
