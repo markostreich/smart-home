@@ -40,7 +40,9 @@ public class DeviceController {
 		/* Device exists */
 		val existingDevice = deviceRepository.findByName(device.name());
 		if (Objects.nonNull(existingDevice)) {
-			log.info("Device '{}' connected.", existingDevice.getName());
+			existingDevice.setLastLogin(Timestamp.from(Instant.now()));
+			deviceRepository.save(existingDevice);
+			log.debug("Device '{}' connected.", existingDevice.getName());
 			return ResponseEntity.accepted().build();
 		}
 
