@@ -45,8 +45,6 @@ void connectClient(const char* clientId) {
 
     if (httpResponseCode > 0) {
       const String response = http.getString();
-      Serial.println(httpResponseCode);
-      Serial.println(response);
     } else {
       Serial.print("Error on sending POST: ");
       Serial.println(httpResponseCode);
@@ -76,10 +74,6 @@ void postSwitchObject(const String& switchObject) {
 
     if (httpResponseCode > 0) {
       String response = http.getString();
-      Serial.print("POST Response code: ");
-      Serial.println(httpResponseCode);
-      Serial.println("Response body:");
-      Serial.println(response);
     } else {
       Serial.print("POST request failed. Code: ");
       Serial.println(httpResponseCode);
