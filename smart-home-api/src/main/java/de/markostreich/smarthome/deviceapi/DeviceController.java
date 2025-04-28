@@ -25,7 +25,6 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@Profile("!testmode")
 @RequestMapping("/device")
 @RequiredArgsConstructor
 @Slf4j

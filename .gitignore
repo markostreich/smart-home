@@ -3,6 +3,7 @@ ServerInfo.h
 RootCa.h
 Bruno/
 *.db
+package-lock.json
 
 ### C++ ###
 # Prerequisites
@@ -157,6 +158,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
+.idea/
 out/
 
 # mpeltonen/sbt-idea plugin

@@ -21,7 +21,7 @@ services:
     volumes:
       - ./config.prod.js:/usr/share/nginx/html/config.js
 
-  # Update images continously
+  # Update images continuously
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower

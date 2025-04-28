@@ -45,7 +45,6 @@ import {
   getCurrentInstance,
 } from "vue";
 import SwitchButton from "./SwitchButton.vue";
-import axios from "axios";
 
 interface SwitchObject {
   name: string;

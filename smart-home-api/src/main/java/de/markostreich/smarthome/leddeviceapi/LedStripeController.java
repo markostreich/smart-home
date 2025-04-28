@@ -1,5 +1,6 @@
 package de.markostreich.smarthome.leddeviceapi;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.context.annotation.Profile;
@@ -32,9 +33,9 @@ public class LedStripeController {
 	private final DeviceRepository ledDeviceRepository;
 
 	@GetMapping(path = "/update/{device}", produces = "application/json")
-	public ResponseEntity<LedStripeObjectDto> update(
+	public ResponseEntity<List<LedStripeObjectDto>> update(
 			@PathVariable(name = "device") final String deviceName) {
-		log.info("Searching data for '{}'...", deviceName);
+		log.debug("Searching data for '{}'...", deviceName);
 		val ledDevice = ledDeviceRepository.findByName(deviceName);
 		if (Objects.isNull(ledDevice)) {
 			log.warn("Could not find device '{}'", deviceName);
@@ -46,18 +47,25 @@ public class LedStripeController {
 					deviceName);
 			return ResponseEntity.noContent().build();
 		}
-		log.info("Found data for device '{}':", deviceName);
-		val ledStripeObject = ledStripeObjectList.get(0);
-		return ResponseEntity.ok(new LedStripeObjectDto(
-				ledStripeObject.getName(), ledStripeObject.getMode().toString(),
-				ledStripeObject.getRed(), ledStripeObject.getGreen(),
-				ledStripeObject.getBlue(), ledStripeObject.getBrightness(),
-				ledStripeObject.getDevice().getName()));
+		log.debug("Found data for device '{}':", deviceName);
+		val ledStripeObjects = ledStripeObjectList.stream()
+				.map(ledStripeObject -> new LedStripeObjectDto(
+						ledStripeObject.getName(),
+						ledStripeObject.getMode().toString(),
+						ledStripeObject.getRed(),
+						ledStripeObject.getGreen(),
+						ledStripeObject.getBlue(),
+						ledStripeObject.getBrightness(),
+						ledStripeObject.getDevice().getName()
+				))
+				.toList();
+		return ResponseEntity.ok(ledStripeObjects);
 	}
 
 	@PostMapping(path = "/stripeobject", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<Object> postLedStripeObject(
 			@RequestBody final LedStripeObjectDto objectDto) {
+		log.info(objectDto.toString());
 		val device = ledDeviceRepository.findByName(objectDto.deviceName());
 		if (Objects.isNull(device)) {
 			log.warn("No device found with name '{}'.", objectDto.deviceName());
@@ -76,14 +84,16 @@ public class LedStripeController {
 			return ResponseEntity.accepted().build();
 		}
 		var createdObject = LedStripeObject.builder()
+				.name(objectDto.name())
 				.mode(LedStripeMode.valueOf(objectDto.mode()))
 				.red(objectDto.red()).green(objectDto.green())
 				.blue(objectDto.blue()).brightness(objectDto.brightness())
 				.device(device).build();
 		createdObject = ledStripeObjectRepository.save(createdObject);
 		val location = ServletUriComponentsBuilder.fromCurrentContextPath()
-				.path("/update").path("/{device}")
-				.buildAndExpand(createdObject.getDevice().getName()).toUri();
+				.path("/{device}").path("/{object}")
+				.buildAndExpand(createdObject.getDevice().getName(),
+						createdObject.getName()).toUri();
 		return ResponseEntity.created(location).build();
 	}
 }

@@ -4,6 +4,7 @@
       <v-toolbar-title>Smart Home</v-toolbar-title>
       <v-spacer />
       <v-btn to="/drawing" text exact> Drawing </v-btn>
+      <v-btn to="/ledstripes" text exact> Led Stripes </v-btn>
       <v-btn to="/switches" text exact> Switches </v-btn>
     </v-app-bar>
 

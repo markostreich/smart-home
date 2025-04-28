@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@web-types/vuetify": "^2.0.15-1"
+  }
+}

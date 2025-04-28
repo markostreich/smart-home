@@ -32,5 +32,6 @@
     "sass": "^1.86.0",
     "sass-loader": "^12.6.0",
     "typescript": "^5.8.2"
-  }
+  },
+  "web-types": "./node_modules/vuetify/dist/json/web-types.json"
 }
