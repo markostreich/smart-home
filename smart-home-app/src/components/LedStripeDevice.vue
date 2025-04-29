@@ -21,10 +21,10 @@
       >
         <v-card outlined>
           <v-card-title class="text-h6">{{ leStripeObject.name }}</v-card-title>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="7">
             <v-select v-model="selectedMode" :items="modes" outlined dense />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="7">
             <v-slider
               v-model="brightness"
               label="Brightness"
@@ -36,7 +36,7 @@
               dense
             />
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="7">
             <v-color-picker
               v-model="color"
               hide-canvas
@@ -47,7 +47,7 @@
               swatches-max-height="100"
             />
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="7">
             <v-btn color="primary" @click="sendStripe(leStripeObject)">
               Send
             </v-btn>
