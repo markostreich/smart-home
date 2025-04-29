@@ -1,17 +1,5 @@
 package de.markostreich.smarthome.deviceapi.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import de.markostreich.smarthome.deviceapi.model.dto.DeviceDto;
 import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
 import de.markostreich.smarthome.leddeviceapi.model.LedPanelObject;
@@ -21,8 +9,13 @@ import de.markostreich.smarthome.leddeviceapi.model.repo.LedStripeObjectReposito
 import de.markostreich.smarthome.switchdeviceapi.model.SwitchObject;
 import de.markostreich.smarthome.switchdeviceapi.model.repo.SwitchObjectRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +26,6 @@ public class DeviceService {
 	private final LedPanelObjectRepository ledPanelObjectRepository;
 	private final LedStripeObjectRepository ledStripeObjectRepository;
 	private final SwitchObjectRepository switchObjectRepository;
-
-	@Value("${smarthome.disconnect-threshold}")
-	private long disconnectThreshold;
 
 	@Transactional(readOnly = true)
 	public List<DeviceDto> getAllDevices() {
@@ -53,18 +43,6 @@ public class DeviceService {
 					getSwitchObjectName(switchObjects)));
 		});
 		return deviceDtos;
-	}
-
-	@Scheduled(fixedDelay = 1000)
-	public void disconnectAbsent() {
-		val currentTime = System.currentTimeMillis();
-		val deviceIterator = deviceRepository.findAll();
-		deviceIterator.forEach(device -> {
-			if (currentTime
-					- device.getLastLogin().getTime() > disconnectThreshold)
-				deviceRepository.delete(device);
-			log.debug("Deleted {}", device.getName());
-		});
 	}
 
 	public boolean deleteDevice(final String deviceName) {

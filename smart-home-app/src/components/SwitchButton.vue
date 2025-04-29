@@ -26,13 +26,15 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
+// eslint-disable-next-line no-undef
 const props = defineProps<{
   isPressed: boolean;
   duration: number | null;
 }>();
 
+// eslint-disable-next-line no-undef
 const emit = defineEmits<{
   (e: "pressed", duration: number | null): void;
   (e: "unpressed", duration: number | null): void;

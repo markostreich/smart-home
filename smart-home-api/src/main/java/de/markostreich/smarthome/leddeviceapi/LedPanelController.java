@@ -52,7 +52,7 @@ public class LedPanelController {
 					deviceName);
 			return ResponseEntity.badRequest().build();
 		}
-		val ledPanelObject = ledPanelObjectList.get(0);
+		val ledPanelObject = ledPanelObjectList.getFirst();
 		log.info("Found data for device '{}':", deviceName);
 		return ResponseEntity.ok(new LedPanelObjectDto(ledPanelObject.getName(),
 				ledPanelObject.getX(), ledPanelObject.getY(),

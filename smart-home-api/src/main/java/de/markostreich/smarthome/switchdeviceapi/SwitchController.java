@@ -95,7 +95,7 @@ public class SwitchController {
 	}
 
 	@GetMapping(path = "/object/{device}/{object}", produces = "application/json")
-	public ResponseEntity<SwitchObjectDto> getSwitchIbject(
+	public ResponseEntity<SwitchObjectDto> getSwitchObject(
 			@PathVariable(name = "device") final String deviceName,
 			@PathVariable(name = "object") final String objectName) {
 		val device = deviceRepository.findByName(deviceName);

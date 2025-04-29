@@ -45,13 +45,7 @@ import {
   getCurrentInstance,
 } from "vue";
 import SwitchButton from "./SwitchButton.vue";
-
-interface SwitchObject {
-  name: string;
-  state: boolean;
-  duration: number | null;
-  deviceName: string;
-}
+import { SwitchObject } from "@/interfaces/SwitchObject";
 
 const props = defineProps<{
   deviceName: string;

@@ -34,13 +34,13 @@ public class LedStripeObject {
 
 	private LedStripeMode mode;
 
-	private byte red;
+	private int red;
 
-	private byte green;
+	private int green;
 
-	private byte blue;
+	private int blue;
 
-	private byte brightness;
+	private int brightness;
 
 	@ManyToOne
 	@JoinColumn(name = "device_id", nullable = false)
