@@ -72,7 +72,7 @@ const { proxy } = getCurrentInstance();
 const lesStripeObjects = ref<LedStripeObject[]>([]);
 let intervalHandle: number | null = null;
 
-const modes = ["THEATER", "RAINBOW", "COLOR"] as const;
+const modes = ["OFF", "THEATER", "RAINBOW", "COLOR"] as const;
 const selectedMode = ref<(typeof modes)[number] | null>("COLOR");
 const color = ref("#0000FF");
 const brightness = ref<number>(100);

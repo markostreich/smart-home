@@ -4,5 +4,6 @@ public enum LedStripeMode {
 
 	THEATER,
 	RAINBOW,
-	COLOR
+	COLOR,
+	OFF
 }
