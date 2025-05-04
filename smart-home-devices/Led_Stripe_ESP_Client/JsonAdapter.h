@@ -20,7 +20,7 @@ public:
 };
 
 LedStripeObjectTO parseLedStripeObjectJson(const char* json) {
-  JsonDocument doc;
+  DynamicJsonDocument doc(2048);
   const DeserializationError error = deserializeJson(doc, json);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
@@ -39,7 +39,7 @@ LedStripeObjectTO parseLedStripeObjectJson(const char* json) {
 }
 
 std::vector<LedStripeObjectTO> parseLedStripeObjectArrayJson(const char* json) {
-  JsonDocument doc;
+  DynamicJsonDocument doc(2048);
   const DeserializationError error = deserializeJson(doc, json);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
@@ -50,13 +50,13 @@ std::vector<LedStripeObjectTO> parseLedStripeObjectArrayJson(const char* json) {
   std::vector<LedStripeObjectTO> results;
   for (JsonObject item : doc.as<JsonArray>()) {
     LedStripeObjectTO obj;
-    obj.name = doc["name"].as<std::string>();
-    obj.mode = doc["mode"].as<std::string>();
-    obj.red = doc["red"];
-    obj.green = doc["green"];
-    obj.blue = doc["blue"];
-    obj.brightness = doc["brightness"];
-    obj.deviceName = doc["deviceName"].as<std::string>();
+    obj.name = item["name"].as<std::string>();
+    obj.mode = item["mode"].as<std::string>();
+    obj.red = item["red"];
+    obj.green = item["green"];
+    obj.blue = item["blue"];
+    obj.brightness = item["brightness"];
+    obj.deviceName = item["deviceName"].as<std::string>();
     results.push_back(obj);
   }
   return results;
