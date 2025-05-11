@@ -19,7 +19,7 @@ public:
   }
 };
 
-SwitchObject parseSwitchObjectJson(const char* json) {
+SwitchObjectTO parseSwitchObjectJson(const char* json) {
   JsonDocument doc;
   const DeserializationError error = deserializeJson(doc, json);
   if (error) {
@@ -27,7 +27,7 @@ SwitchObject parseSwitchObjectJson(const char* json) {
     Serial.println(error.c_str());
     throw JsonParseException();
   }
-  SwitchObject result;
+  SwitchObjectTO result;
   result.name = doc["name"].as<std::string>();
   result.state = doc["state"];
   result.duration = doc["duration"];
@@ -35,7 +35,7 @@ SwitchObject parseSwitchObjectJson(const char* json) {
   return result;
 }
 
-std::vector<SwitchObject> parseSwitchObjectArrayJson(const char* json) {
+std::vector<SwitchObjectTO> parseSwitchObjectArrayJson(const char* json) {
   JsonDocument doc;
   const DeserializationError error = deserializeJson(doc, json);
   if (error) {
@@ -44,9 +44,9 @@ std::vector<SwitchObject> parseSwitchObjectArrayJson(const char* json) {
     throw JsonParseException();
   }
 
-  std::vector<SwitchObject> results;
+  std::vector<SwitchObjectTO> results;
   for (JsonObject item : doc.as<JsonArray>()) {
-    SwitchObject obj;
+    SwitchObjectTO obj;
     obj.name = item["name"].as<std::string>();
     obj.state = item["state"];
     obj.duration = item["duration"];
@@ -56,7 +56,7 @@ std::vector<SwitchObject> parseSwitchObjectArrayJson(const char* json) {
   return results;
 }
 
-String serializeSwitchObject(const SwitchObject& obj) {
+String serializeSwitchObject(const SwitchObjectTO& obj) {
   JsonDocument doc;
   doc["name"] = obj.name;
   doc["state"] = obj.state;

@@ -17,7 +17,7 @@
  *   "deviceName": "Device One"
  * }
  */
-struct SwitchObject {
+struct SwitchObjectTO {
 
   std::string name;
 
@@ -26,6 +26,14 @@ struct SwitchObject {
   unsigned int duration;
 
   std::string deviceName;
+};
+
+struct SwitchObject {
+  SwitchObjectTO object;
+
+  unsigned long stopTime;
+  
+  unsigned int pin;
 };
 
 #endif //SWITCH_OBJECT
