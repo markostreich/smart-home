@@ -25,7 +25,6 @@ SwitchObjectTO parseSwitchObjectJson(const char* json) {
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
     Serial.println(error.c_str());
-    throw JsonParseException();
   }
   SwitchObjectTO result;
   result.name = doc["name"].as<std::string>();
@@ -41,7 +40,6 @@ std::vector<SwitchObjectTO> parseSwitchObjectArrayJson(const char* json) {
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
     Serial.println(error.c_str());
-    throw JsonParseException();
   }
 
   std::vector<SwitchObjectTO> results;

@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
+#include <time.h>
 
 constexpr const char* CONNECT_API = "device/connect";
 constexpr const char* UPDATE_API = "switch/update";
@@ -14,6 +15,20 @@ constexpr const char* POST_API = "switch/object";
 const String connectApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(CONNECT_API);
 const String updateApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(UPDATE_API) + "/";
 const String postApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(POST_API);
+
+void syncTime() {
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Syncing time");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2) {
+    delay(500);
+    Serial.print(".");
+    now = time(nullptr);
+  }
+
+  Serial.println("\nTime synced!");
+}
 
 void connectToWiFi() {
 #ifndef TEST_MODE
@@ -25,6 +40,7 @@ void connectToWiFi() {
   }
 #endif  // not TEST_MODE
   Serial.println("\nConnected to WiFi");
+  syncTime();
 }
 
 void connectClient(const char* clientId) {
@@ -53,6 +69,8 @@ void connectClient(const char* clientId) {
     http.end();
   } else {
     Serial.println("Error in WiFi connection");
+    WiFi.disconnect();
+    connectToWiFi();
   }
 #endif  // not TEST_MODE
 }
@@ -82,6 +100,8 @@ void postSwitchObject(const String& switchObject) {
     http.end();
   } else {
     Serial.println("WiFi not connected");
+    WiFi.disconnect();
+    connectToWiFi();
   }
 #endif  // not TEST_MODE
 }
@@ -110,6 +130,8 @@ String getUpdate(const char* clientId) {
     http.end();
   } else {
     Serial.println("Error in WiFi connection");
+    WiFi.disconnect();
+    connectToWiFi();
   }
   return json;
 #else
