@@ -1,7 +1,5 @@
 package de.markostreich.smarthome.switchdeviceapi;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +41,6 @@ public class SwitchController {
 			log.warn("Could not find device '{}'.", deviceName);
 			return ResponseEntity.notFound().build();
 		}
-		refreshDeviceLogin(deviceName);
 		val switchObjectList = switchObjectRepository.findByDevice(device);
 		if (switchObjectList.isEmpty()) {
 			log.warn("Could not find switch data for device '{}'.", deviceName);
@@ -71,7 +68,6 @@ public class SwitchController {
 					switchObjectDto.deviceName());
 			return ResponseEntity.notFound().build();
 		}
-		refreshDeviceLogin(switchObjectDto.deviceName());
 		val existingSwitchObjectOptional = switchObjectRepository
 				.findByNameAndDevice(switchObjectDto.name(), device);
 		if (existingSwitchObjectOptional.isPresent()) {
@@ -108,7 +104,6 @@ public class SwitchController {
 					deviceName);
 			return ResponseEntity.notFound().build();
 		}
-		refreshDeviceLogin(deviceName);
 		val optionalSwitchObject = switchObjectRepository
 				.findByNameAndDevice(objectName, device);
 		optionalSwitchObject.ifPresentOrElse(
@@ -134,18 +129,12 @@ public class SwitchController {
 					deviceName);
 			return ResponseEntity.notFound().build();
 		}
-		refreshDeviceLogin(deviceName);
 		return switchObjectRepository.findByNameAndDevice(objectName, device)
 				.map(switchObject -> {
 					switchObjectRepository.delete(switchObject);
 					return ResponseEntity.ok("SwitchObject '" + objectName
 							+ "' was deleted successfully.");
 				}).orElse(ResponseEntity.notFound().build());
-	}
-
-	private void refreshDeviceLogin(final String deviceName) {
-		deviceRepository.updateLastLoginByName(deviceName,
-				Timestamp.from(Instant.now()));
 	}
 
 }

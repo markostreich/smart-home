@@ -63,8 +63,10 @@ void loop() {
 }
 
 void registerSwitchObjects() {
-  for (const auto& switchObject : globalSwitchObjects)
+  for (const auto& switchObject : globalSwitchObjects) {
+    connectClient(DEVICE_NAME);
     postSwitchObject(serializeSwitchObject(switchObject.object));
+  }
 }
 
 void updateSwitch(const SwitchObjectTO& sourceObject, SwitchObject& targetObject) {

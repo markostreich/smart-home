@@ -1,6 +1,5 @@
 package de.markostreich.smarthome.deviceapi.service;
 
-import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -21,13 +20,13 @@ public class DeviceDisconnectService {
     @Value("${smarthome.disconnect-threshold}")
     private long disconnectThreshold;
 
-    private final DeviceRepository deviceRepository;
+    private final DeviceService deviceService;
 
     @Scheduled(fixedDelay = 1000)
     public void disconnectAbsent() {
         val threshold = Timestamp.from(
                 Instant.now().minusMillis(disconnectThreshold));
-        val deletedDevices = deviceRepository.deleteByLastLoginBefore(threshold);
+        val deletedDevices = deviceService.deleteDisconnectedDevices(threshold);
         if (deletedDevices > 0)
             log.debug("Deleted {} disconnected device(s).", deletedDevices);
     }

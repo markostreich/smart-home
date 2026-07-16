@@ -71,12 +71,28 @@ public class DeviceService {
 		return deviceDtos;
 	}
 
+	@Transactional
 	public boolean deleteDevice(final String deviceName) {
-		val device = deviceRepository.findByName(deviceName);
-		if (Objects.isNull(device))
+		val deviceId = deviceRepository.findIdByName(deviceName);
+		if (Objects.isNull(deviceId))
 			return false;
-		deviceRepository.delete(device);
+		deleteDevices(List.of(deviceId));
 		return true;
+	}
+
+	@Transactional
+	public int deleteDisconnectedDevices(final Timestamp threshold) {
+		val deviceIds = deviceRepository.findIdsByLastLoginBefore(threshold);
+		if (deviceIds.isEmpty())
+			return 0;
+		return deleteDevices(deviceIds);
+	}
+
+	private int deleteDevices(final Collection<UUID> deviceIds) {
+		switchObjectRepository.deleteByDeviceIdIn(deviceIds);
+		ledStripeObjectRepository.deleteByDeviceIdIn(deviceIds);
+		ledPanelObjectRepository.deleteByDeviceIdIn(deviceIds);
+		return deviceRepository.deleteByIdIn(deviceIds);
 	}
 
 	private Set<String> getLedPanelObjectName(
