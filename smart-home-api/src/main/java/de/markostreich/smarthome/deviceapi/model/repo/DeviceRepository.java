@@ -18,4 +18,9 @@ public interface DeviceRepository extends CrudRepository<Device, UUID> {
 	@Transactional
 	@Query("update Device d set d.lastLogin = :lastLogin where d.name = :name")
 	int updateLastLoginByName(String name, Timestamp lastLogin);
+
+	@Modifying
+	@Transactional
+	@Query("delete from Device d where d.lastLogin < :lastLogin")
+	int deleteByLastLoginBefore(Timestamp lastLogin);
 }

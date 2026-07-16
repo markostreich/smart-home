@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
 @Profile("!dev")
 @Service
 @RequiredArgsConstructor
@@ -22,14 +25,10 @@ public class DeviceDisconnectService {
 
     @Scheduled(fixedDelay = 1000)
     public void disconnectAbsent() {
-        val currentTime = System.currentTimeMillis();
-        val deviceIterator = deviceRepository.findAll();
-        deviceIterator.forEach(device -> {
-            if (currentTime
-                    - device.getLastLogin().getTime() > disconnectThreshold) {
-                deviceRepository.delete(device);
-                log.debug("Deleted {}", device.getName());
-            }
-        });
+        val threshold = Timestamp.from(
+                Instant.now().minusMillis(disconnectThreshold));
+        val deletedDevices = deviceRepository.deleteByLastLoginBefore(threshold);
+        if (deletedDevices > 0)
+            log.debug("Deleted {} disconnected device(s).", deletedDevices);
     }
 }
