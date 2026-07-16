@@ -1,5 +1,6 @@
 package de.markostreich.smarthome.deviceapi.service;
 
+import de.markostreich.smarthome.deviceapi.model.Device;
 import de.markostreich.smarthome.deviceapi.model.dto.DeviceDto;
 import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
 import de.markostreich.smarthome.leddeviceapi.model.LedPanelObject;
@@ -11,9 +12,12 @@ import de.markostreich.smarthome.switchdeviceapi.model.repo.SwitchObjectReposito
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +30,29 @@ public class DeviceService {
 	private final LedPanelObjectRepository ledPanelObjectRepository;
 	private final LedStripeObjectRepository ledStripeObjectRepository;
 	private final SwitchObjectRepository switchObjectRepository;
+
+	public boolean connectDevice(final String deviceName) {
+		val now = Timestamp.from(Instant.now());
+		if (deviceRepository.updateLastLoginByName(deviceName, now) > 0) {
+			log.debug("Device '{}' connected.", deviceName);
+			return false;
+		}
+
+		try {
+			log.info("Adding new device '{}'.", deviceName);
+			val createdDevice = Device.builder().name(deviceName).lastLogin(now)
+					.build();
+			deviceRepository.save(createdDevice);
+			log.info("Added new device '{}'.", deviceName);
+			return true;
+		} catch (final DataIntegrityViolationException exception) {
+			log.debug("Device '{}' was created concurrently. Updating login.",
+					deviceName);
+			deviceRepository.updateLastLoginByName(deviceName,
+					Timestamp.from(Instant.now()));
+			return false;
+		}
+	}
 
 	@Transactional(readOnly = true)
 	public List<DeviceDto> getAllDevices() {

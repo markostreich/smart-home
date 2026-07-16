@@ -1,10 +1,21 @@
 package de.markostreich.smarthome.deviceapi.model.repo;
 
+import java.sql.Timestamp;
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import de.markostreich.smarthome.deviceapi.model.Device;
 
-public interface DeviceRepository extends CrudRepository<Device, String> {
+public interface DeviceRepository extends CrudRepository<Device, UUID> {
 
 	Device findByName(String name);
+
+	@Modifying
+	@Transactional
+	@Query("update Device d set d.lastLogin = :lastLogin where d.name = :name")
+	int updateLastLoginByName(String name, Timestamp lastLogin);
 }
