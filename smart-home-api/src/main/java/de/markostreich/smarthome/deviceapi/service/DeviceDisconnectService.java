@@ -26,9 +26,10 @@ public class DeviceDisconnectService {
         val deviceIterator = deviceRepository.findAll();
         deviceIterator.forEach(device -> {
             if (currentTime
-                    - device.getLastLogin().getTime() > disconnectThreshold)
+                    - device.getLastLogin().getTime() > disconnectThreshold) {
                 deviceRepository.delete(device);
-            log.debug("Deleted {}", device.getName());
+                log.debug("Deleted {}", device.getName());
+            }
         });
     }
 }

@@ -1,20 +1,20 @@
-#ifndef REST_CLIENT_H
-#define REST_CLIENT_H
+#ifndef REST_CLIENT_LOCAL_LAN_H
+#define REST_CLIENT_LOCAL_LAN_H
 
 #include "LocalLan.h"
 #include "ServerInfo.h"
-#include "RootCa.h"
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
+#include <WiFiClient.h>
 #include <HTTPClient.h>
 #include <time.h>
 
 constexpr const char* CONNECT_API = "device/connect";
 constexpr const char* UPDATE_API = "switch/update";
 constexpr const char* POST_API = "switch/object";
-const String connectApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(CONNECT_API);
-const String updateApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(UPDATE_API) + "/";
-const String postApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(POST_API);
+
+const String connectApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(CONNECT_API);
+const String updateApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(UPDATE_API) + "/";
+const String postApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(POST_API);
 
 int lastUpdateHttpResponseCode = 0;
 
@@ -59,26 +59,24 @@ void connectToWiFi() {
 void connectClient(const char* clientId) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
-    httpsClient.setCACert(root_ca);
-
-    // For testing purposes, you can bypass SSL certificate verification (NOT recommended for production).
-    //httpsClient.setInsecure();
-
+    WiFiClient lanClient;
     HTTPClient http;
-    http.begin(httpsClient, connectApi);
+    http.begin(lanClient, connectApi);
     http.addHeader("Content-Type", "application/json");
 
     const String httpRequestData = "{\"name\":\"" + String(clientId) + "\"}";
-    Serial.print("Connecting device: ");
+    Serial.print("Connecting device at ");
+    Serial.print(connectApi);
+    Serial.print(": ");
     Serial.println(httpRequestData);
-    int httpResponseCode = http.POST(httpRequestData);
+
+    const int httpResponseCode = http.POST(httpRequestData);
     const String response = http.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Device connect", httpResponseCode, response);
     } else {
-      Serial.print("Error on sending POST: ");
+      Serial.print("Device connect failed. Code: ");
       Serial.println(httpResponseCode);
     }
 
@@ -94,20 +92,18 @@ void connectClient(const char* clientId) {
 void postSwitchObject(const String& switchObject) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
-    httpsClient.setCACert(root_ca);
-
-    // Insecure mode for development/testing (don't use in production)
-    // httpsClient.setInsecure();
-
+    WiFiClient lanClient;
     HTTPClient http;
-    http.begin(httpsClient, postApi);
+    http.begin(lanClient, postApi);
     http.addHeader("Content-Type", "application/json");
 
-    Serial.print("Posting switch object: ");
+    Serial.print("Posting switch object at ");
+    Serial.print(postApi);
+    Serial.print(": ");
     Serial.println(switchObject);
-    int httpResponseCode = http.POST(switchObject);
-    String response = http.getString();
+
+    const int httpResponseCode = http.POST(switchObject);
+    const String response = http.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Switch object POST", httpResponseCode, response);
@@ -115,7 +111,7 @@ void postSwitchObject(const String& switchObject) {
         Serial.println("Switch object was not saved or updated successfully.");
       }
     } else {
-      Serial.print("POST request failed. Code: ");
+      Serial.print("Switch object POST failed. Code: ");
       Serial.println(httpResponseCode);
     }
 
@@ -132,14 +128,14 @@ String getUpdate(const char* clientId) {
 #ifndef TEST_MODE
   String json = "";
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
-    httpsClient.setCACert(root_ca);
-
-    // For testing purposes, you can bypass SSL certificate verification (NOT recommended for production).
-    // httpsClient.setInsecure();
-
+    WiFiClient lanClient;
     HTTPClient http;
-    http.begin(httpsClient, updateApi + String(clientId));
+    const String updateUrl = updateApi + String(clientId);
+    http.begin(lanClient, updateUrl);
+
+    Serial.print("Getting switch update from ");
+    Serial.println(updateUrl);
+
     const int httpResponseCode = http.GET();
     lastUpdateHttpResponseCode = httpResponseCode;
 
@@ -150,7 +146,7 @@ String getUpdate(const char* clientId) {
       logHttpResponse("Switch update GET", httpResponseCode, response);
       json = response;
     } else {
-      Serial.print("Error on sending GET: ");
+      Serial.print("Switch update GET failed. Code: ");
       Serial.println(httpResponseCode);
     }
 
@@ -167,4 +163,4 @@ String getUpdate(const char* clientId) {
 #endif  // not TEST_MODE
 }
 
-#endif  // REST_CLIENT_H
+#endif  // REST_CLIENT_LOCAL_LAN_H
