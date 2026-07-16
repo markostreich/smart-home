@@ -57,7 +57,6 @@ public class DeviceService {
 	@Transactional(readOnly = true)
 	public List<DeviceDto> getAllDevices() {
 		val deviceIterator = deviceRepository.findAll();
-		log.debug(deviceIterator.toString());
 		val deviceDtos = new ArrayList<DeviceDto>();
 		deviceIterator.forEach(device -> {
 			val ledPanelObjects = ledPanelObjectRepository.findByDevice(device);
