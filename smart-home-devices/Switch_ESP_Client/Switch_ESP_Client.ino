@@ -29,8 +29,8 @@ void setup() {
   globalSwitchObjects.push_back(Big_Pump_2);
   connectToWiFi();
   connectClient(DEVICE_NAME);
+  registerSwitchObjects();
   for (const auto& switchObject : globalSwitchObjects) {
-    postSwitchObject(serializeSwitchObject(switchObject.object));
     pinMode(switchObject.pin, OUTPUT);
   }
 }
@@ -41,13 +41,30 @@ void loop() {
     handleDuration(globalSwitchObject, currentTime);
   if (currentTime - lastTime >= RECONNECT_INTERVAL) {
     connectClient(DEVICE_NAME);
-    const std::vector<SwitchObjectTO> switchObjectTOs = parseSwitchObjectArrayJson(getUpdate(DEVICE_NAME).c_str());
+    const String updateJson = getUpdate(DEVICE_NAME);
+    if (lastUpdateHttpResponseCode == HTTP_CODE_NO_CONTENT) {
+      Serial.println("No switch data found on API. Registering switch objects again.");
+      connectClient(DEVICE_NAME);
+      registerSwitchObjects();
+      lastTime = currentTime;
+      return;
+    }
+    if (updateJson.length() == 0) {
+      lastTime = currentTime;
+      return;
+    }
+    const std::vector<SwitchObjectTO> switchObjectTOs = parseSwitchObjectArrayJson(updateJson.c_str());
     for (const auto& switchObjectTO : switchObjectTOs)
       for (auto& globalSwitchObject : globalSwitchObjects)
         updateSwitch(switchObjectTO, globalSwitchObject);
     lastTime = currentTime;
   }
   delay(100);
+}
+
+void registerSwitchObjects() {
+  for (const auto& switchObject : globalSwitchObjects)
+    postSwitchObject(serializeSwitchObject(switchObject.object));
 }
 
 void updateSwitch(const SwitchObjectTO& sourceObject, SwitchObject& targetObject) {
