@@ -40,31 +40,30 @@ void loop() {
   for (auto& globalSwitchObject : globalSwitchObjects)
     handleDuration(globalSwitchObject, currentTime);
   if (currentTime - lastTime >= RECONNECT_INTERVAL) {
-    connectClient(DEVICE_NAME);
     const String updateJson = getUpdate(DEVICE_NAME);
-    if (lastUpdateHttpResponseCode == HTTP_CODE_NO_CONTENT) {
-      Serial.println("No switch data found on API. Registering switch objects again.");
+    if (lastUpdateHttpResponseCode == HTTP_CODE_NO_CONTENT ||
+        lastUpdateHttpResponseCode == HTTP_CODE_NOT_FOUND) {
+      Serial.println("Device or switch data not found on API. Registering again.");
       connectClient(DEVICE_NAME);
       registerSwitchObjects();
-      lastTime = currentTime;
+      lastTime = millis();
       return;
     }
     if (updateJson.length() == 0) {
-      lastTime = currentTime;
+      lastTime = millis();
       return;
     }
     const std::vector<SwitchObjectTO> switchObjectTOs = parseSwitchObjectArrayJson(updateJson.c_str());
     for (const auto& switchObjectTO : switchObjectTOs)
       for (auto& globalSwitchObject : globalSwitchObjects)
         updateSwitch(switchObjectTO, globalSwitchObject);
-    lastTime = currentTime;
+    lastTime = millis();
   }
   delay(100);
 }
 
 void registerSwitchObjects() {
   for (const auto& switchObject : globalSwitchObjects) {
-    connectClient(DEVICE_NAME);
     postSwitchObject(serializeSwitchObject(switchObject.object));
   }
 }
