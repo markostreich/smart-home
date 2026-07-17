@@ -1,11 +1,12 @@
 package de.markostreich.smarthome.switchdeviceapi;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,8 @@ public class SwitchController {
 			log.warn("Could not find device '{}'.", deviceName);
 			return ResponseEntity.notFound().build();
 		}
+		deviceRepository.updateLastLoginByName(deviceName,
+				Timestamp.from(Instant.now()));
 		val switchObjectList = switchObjectRepository.findByDevice(device);
 		if (switchObjectList.isEmpty()) {
 			log.warn("Could not find switch data for device '{}'.", deviceName);
@@ -68,6 +71,8 @@ public class SwitchController {
 					switchObjectDto.deviceName());
 			return ResponseEntity.notFound().build();
 		}
+		deviceRepository.updateLastLoginByName(switchObjectDto.deviceName(),
+				Timestamp.from(Instant.now()));
 		val existingSwitchObjectOptional = switchObjectRepository
 				.findByNameAndDevice(switchObjectDto.name(), device);
 		if (existingSwitchObjectOptional.isPresent()) {
@@ -92,49 +97,6 @@ public class SwitchController {
 						createdSwitchObject.getName())
 				.toUri();
 		return ResponseEntity.created(location).build();
-	}
-
-	@GetMapping(path = "/object/{device}/{object}", produces = "application/json")
-	public ResponseEntity<SwitchObjectDto> getSwitchObject(
-			@PathVariable(name = "device") final String deviceName,
-			@PathVariable(name = "object") final String objectName) {
-		val device = deviceRepository.findByName(deviceName);
-		if (Objects.isNull(device)) {
-			log.warn("Get SwitchObject: Could not find device '{}'.",
-					deviceName);
-			return ResponseEntity.notFound().build();
-		}
-		val optionalSwitchObject = switchObjectRepository
-				.findByNameAndDevice(objectName, device);
-		optionalSwitchObject.ifPresentOrElse(
-				object -> log.info("Found {}", object.getName()),
-				() -> log.info("Could not find {}", objectName));
-		return switchObjectRepository.findByNameAndDevice(objectName, device)
-				.map(switchObject -> {
-					val responseBody = new SwitchObjectDto(
-							switchObject.getName(), switchObject.isState(),
-							switchObject.getDuration(),
-							switchObject.getDevice().getName());
-					return ResponseEntity.ok(responseBody);
-				}).orElse(ResponseEntity.notFound().build());
-	}
-
-	@DeleteMapping(path = "/object/{device}/{object}")
-	public ResponseEntity<String> deleteSwitchObject(
-			@PathVariable(name = "device") final String deviceName,
-			@PathVariable(name = "object") final String objectName) {
-		val device = deviceRepository.findByName(deviceName);
-		if (Objects.isNull(device)) {
-			log.warn("Delete SwitchObject: Could not find device '{}'.",
-					deviceName);
-			return ResponseEntity.notFound().build();
-		}
-		return switchObjectRepository.findByNameAndDevice(objectName, device)
-				.map(switchObject -> {
-					switchObjectRepository.delete(switchObject);
-					return ResponseEntity.ok("SwitchObject '" + objectName
-							+ "' was deleted successfully.");
-				}).orElse(ResponseEntity.notFound().build());
 	}
 
 }

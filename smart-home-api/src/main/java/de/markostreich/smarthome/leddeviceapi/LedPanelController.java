@@ -1,5 +1,7 @@
 package de.markostreich.smarthome.leddeviceapi;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Objects;
 
@@ -41,6 +43,8 @@ public class LedPanelController {
 			log.warn("Could not find device '{}'.", deviceName);
 			return ResponseEntity.notFound().build();
 		}
+		deviceRepository.updateLastLoginByName(deviceName,
+				Timestamp.from(Instant.now()));
 		val ledPanelObjectList = ledPanelObjectRepository.findByDevice(device);
 		if (ledPanelObjectList.isEmpty()) {
 			log.warn("Could not find led panel data for device '{}'.",

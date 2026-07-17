@@ -58,9 +58,7 @@ let intervalHandle: number | null = null;
 
 const fetchButtons = async () => {
   try {
-    const response = await proxy?.$axios.get(
-      "/switch/update/" + props.deviceName
-    );
+    const response = await proxy?.$axios.get("/ui/switch/" + props.deviceName);
     switchObjects.value = response.data;
   } catch (error) {
     console.error("Error fetching buttons:", error);
@@ -74,7 +72,7 @@ const handlePress = async (
   deviceName: string
 ) => {
   try {
-    await proxy?.$axios.post("/switch/object", {
+    await proxy?.$axios.post("/ui/switch", {
       name,
       state,
       duration,

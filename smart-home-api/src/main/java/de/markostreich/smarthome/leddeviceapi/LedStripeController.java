@@ -1,5 +1,7 @@
 package de.markostreich.smarthome.leddeviceapi;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
 import de.markostreich.smarthome.leddeviceapi.model.LedStripeMode;
 import de.markostreich.smarthome.leddeviceapi.model.LedStripeObject;
@@ -35,6 +37,8 @@ public class LedStripeController {
             log.warn("Could not find device '{}'", deviceName);
             return ResponseEntity.notFound().build();
         }
+        ledDeviceRepository.updateLastLoginByName(deviceName,
+                Timestamp.from(Instant.now()));
         val ledStripeObjectList = ledStripeObjectRepository.findByDevice(ledDevice);
         if (ledStripeObjectList.isEmpty()) {
             log.warn("Could not find led stripe data for device '{}'.",
@@ -65,6 +69,8 @@ public class LedStripeController {
             log.warn("No device found with name '{}'.", objectDto.deviceName());
             return ResponseEntity.noContent().build();
         }
+        ledDeviceRepository.updateLastLoginByName(objectDto.deviceName(),
+                Timestamp.from(Instant.now()));
         val existingLedStripeObjectOptional = ledStripeObjectRepository.findByNameAndDevice(objectDto.name(), device);
         if (existingLedStripeObjectOptional.isPresent()) {
             val existingLedStripeObject = existingLedStripeObjectOptional.get();
