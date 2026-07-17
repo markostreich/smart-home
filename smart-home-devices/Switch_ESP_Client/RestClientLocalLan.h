@@ -16,6 +16,8 @@ const String connectApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(CO
 const String updateApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(UPDATE_API) + "/";
 const String postApi = String(SERVER_URL) + ":" + HTTP_PORT + "/" + String(POST_API);
 
+WiFiClient lanClient;
+HTTPClient lanHttpClient;
 int lastUpdateHttpResponseCode = 0;
 
 void logHttpResponse(const char* operation, const int httpResponseCode, const String& response) {
@@ -59,10 +61,9 @@ void connectToWiFi() {
 void connectClient(const char* clientId) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient lanClient;
-    HTTPClient http;
-    http.begin(lanClient, connectApi);
-    http.addHeader("Content-Type", "application/json");
+    lanHttpClient.begin(lanClient, connectApi);
+    lanHttpClient.setReuse(true);
+    lanHttpClient.addHeader("Content-Type", "application/json");
 
     const String httpRequestData = "{\"name\":\"" + String(clientId) + "\"}";
     Serial.print("Connecting device at ");
@@ -70,8 +71,8 @@ void connectClient(const char* clientId) {
     Serial.print(": ");
     Serial.println(httpRequestData);
 
-    const int httpResponseCode = http.POST(httpRequestData);
-    const String response = http.getString();
+    const int httpResponseCode = lanHttpClient.POST(httpRequestData);
+    const String response = lanHttpClient.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Device connect", httpResponseCode, response);
@@ -80,9 +81,10 @@ void connectClient(const char* clientId) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    lanHttpClient.end();
   } else {
     Serial.println("Error in WiFi connection");
+    lanClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
@@ -92,18 +94,17 @@ void connectClient(const char* clientId) {
 void postSwitchObject(const String& switchObject) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient lanClient;
-    HTTPClient http;
-    http.begin(lanClient, postApi);
-    http.addHeader("Content-Type", "application/json");
+    lanHttpClient.begin(lanClient, postApi);
+    lanHttpClient.setReuse(true);
+    lanHttpClient.addHeader("Content-Type", "application/json");
 
     Serial.print("Posting switch object at ");
     Serial.print(postApi);
     Serial.print(": ");
     Serial.println(switchObject);
 
-    const int httpResponseCode = http.POST(switchObject);
-    const String response = http.getString();
+    const int httpResponseCode = lanHttpClient.POST(switchObject);
+    const String response = lanHttpClient.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Switch object POST", httpResponseCode, response);
@@ -115,9 +116,10 @@ void postSwitchObject(const String& switchObject) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    lanHttpClient.end();
   } else {
     Serial.println("WiFi not connected");
+    lanClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
@@ -128,21 +130,20 @@ String getUpdate(const char* clientId) {
 #ifndef TEST_MODE
   String json = "";
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient lanClient;
-    HTTPClient http;
     const String updateUrl = updateApi + String(clientId);
-    http.begin(lanClient, updateUrl);
+    lanHttpClient.begin(lanClient, updateUrl);
+    lanHttpClient.setReuse(true);
 
     Serial.print("Getting switch update from ");
     Serial.println(updateUrl);
 
-    const int httpResponseCode = http.GET();
+    const int httpResponseCode = lanHttpClient.GET();
     lastUpdateHttpResponseCode = httpResponseCode;
 
     if (httpResponseCode == HTTP_CODE_NO_CONTENT) {
       logHttpResponse("Switch update GET", httpResponseCode, "");
     } else if (httpResponseCode > 0) {
-      const String response = http.getString();
+      const String response = lanHttpClient.getString();
       logHttpResponse("Switch update GET", httpResponseCode, response);
       json = response;
     } else {
@@ -150,10 +151,11 @@ String getUpdate(const char* clientId) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    lanHttpClient.end();
   } else {
     Serial.println("Error in WiFi connection");
     lastUpdateHttpResponseCode = 0;
+    lanClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
