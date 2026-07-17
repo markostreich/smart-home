@@ -16,6 +16,8 @@ const String connectApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(C
 const String updateApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(UPDATE_API) + "/";
 const String postApi = String(SERVER_URL) + ":" + HTTPS_PORT + "/" + String(POST_API);
 
+WiFiClientSecure httpsClient;
+HTTPClient httpsHttpClient;
 int lastUpdateHttpResponseCode = 0;
 
 void logHttpResponse(const char* operation, const int httpResponseCode, const String& response) {
@@ -59,21 +61,20 @@ void connectToWiFi() {
 void connectClient(const char* clientId) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
     httpsClient.setCACert(root_ca);
 
     // For testing purposes, you can bypass SSL certificate verification (NOT recommended for production).
     //httpsClient.setInsecure();
 
-    HTTPClient http;
-    http.begin(httpsClient, connectApi);
-    http.addHeader("Content-Type", "application/json");
+    httpsHttpClient.begin(httpsClient, connectApi);
+    httpsHttpClient.setReuse(true);
+    httpsHttpClient.addHeader("Content-Type", "application/json");
 
     const String httpRequestData = "{\"name\":\"" + String(clientId) + "\"}";
     Serial.print("Connecting device: ");
     Serial.println(httpRequestData);
-    int httpResponseCode = http.POST(httpRequestData);
-    const String response = http.getString();
+    int httpResponseCode = httpsHttpClient.POST(httpRequestData);
+    const String response = httpsHttpClient.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Device connect", httpResponseCode, response);
@@ -82,9 +83,10 @@ void connectClient(const char* clientId) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    httpsHttpClient.end();
   } else {
     Serial.println("Error in WiFi connection");
+    httpsClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
@@ -94,20 +96,19 @@ void connectClient(const char* clientId) {
 void postSwitchObject(const String& switchObject) {
 #ifndef TEST_MODE
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
     httpsClient.setCACert(root_ca);
 
     // Insecure mode for development/testing (don't use in production)
     // httpsClient.setInsecure();
 
-    HTTPClient http;
-    http.begin(httpsClient, postApi);
-    http.addHeader("Content-Type", "application/json");
+    httpsHttpClient.begin(httpsClient, postApi);
+    httpsHttpClient.setReuse(true);
+    httpsHttpClient.addHeader("Content-Type", "application/json");
 
     Serial.print("Posting switch object: ");
     Serial.println(switchObject);
-    int httpResponseCode = http.POST(switchObject);
-    String response = http.getString();
+    int httpResponseCode = httpsHttpClient.POST(switchObject);
+    String response = httpsHttpClient.getString();
 
     if (httpResponseCode > 0) {
       logHttpResponse("Switch object POST", httpResponseCode, response);
@@ -119,9 +120,10 @@ void postSwitchObject(const String& switchObject) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    httpsHttpClient.end();
   } else {
     Serial.println("WiFi not connected");
+    httpsClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
@@ -132,21 +134,20 @@ String getUpdate(const char* clientId) {
 #ifndef TEST_MODE
   String json = "";
   if (WiFi.status() == WL_CONNECTED) {
-    WiFiClientSecure httpsClient;
     httpsClient.setCACert(root_ca);
 
     // For testing purposes, you can bypass SSL certificate verification (NOT recommended for production).
     // httpsClient.setInsecure();
 
-    HTTPClient http;
-    http.begin(httpsClient, updateApi + String(clientId));
-    const int httpResponseCode = http.GET();
+    httpsHttpClient.begin(httpsClient, updateApi + String(clientId));
+    httpsHttpClient.setReuse(true);
+    const int httpResponseCode = httpsHttpClient.GET();
     lastUpdateHttpResponseCode = httpResponseCode;
 
     if (httpResponseCode == HTTP_CODE_NO_CONTENT) {
       logHttpResponse("Switch update GET", httpResponseCode, "");
     } else if (httpResponseCode > 0) {
-      const String response = http.getString();
+      const String response = httpsHttpClient.getString();
       logHttpResponse("Switch update GET", httpResponseCode, response);
       json = response;
     } else {
@@ -154,10 +155,11 @@ String getUpdate(const char* clientId) {
       Serial.println(httpResponseCode);
     }
 
-    http.end();
+    httpsHttpClient.end();
   } else {
     Serial.println("Error in WiFi connection");
     lastUpdateHttpResponseCode = 0;
+    httpsClient.stop();
     WiFi.disconnect();
     connectToWiFi();
   }
