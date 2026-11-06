@@ -1,5 +1,5 @@
 # Use an official OpenJDK runtime as a base image
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 
 # Set the working directory
 WORKDIR /app

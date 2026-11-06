@@ -24,26 +24,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"name", "device_id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "device_id"})})
 public class SwitchObject {
 
-	@Id
-	@GeneratedValue
-	@Column(unique = true, nullable = false)
-	private UUID id;
+    @Id
+    @GeneratedValue
+    @Column(unique = true, nullable = false)
+    private UUID id;
 
-	@Column(nullable = false)
-	private String name;
+    @Column(nullable = false)
+    private String name;
 
-	private boolean state;
+    private boolean state;
 
-	@Column(nullable = true)
-	/** Duration in seconds. */
-	private Integer duration;
+    /**
+     * Duration in seconds.
+     */
+    @Column(nullable = true)
+    private Integer duration;
 
-	@ManyToOne
-	@JoinColumn(name = "device_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Device device;
+    @ManyToOne
+    @JoinColumn(name = "device_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Device device;
 }

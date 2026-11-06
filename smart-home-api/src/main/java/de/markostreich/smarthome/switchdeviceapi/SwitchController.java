@@ -1,10 +1,12 @@
 package de.markostreich.smarthome.switchdeviceapi;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-
+import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
+import de.markostreich.smarthome.switchdeviceapi.model.SwitchObject;
+import de.markostreich.smarthome.switchdeviceapi.model.dto.SwitchObjectDto;
+import de.markostreich.smarthome.switchdeviceapi.model.repo.SwitchObjectRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import de.markostreich.smarthome.deviceapi.model.repo.DeviceRepository;
-import de.markostreich.smarthome.switchdeviceapi.model.SwitchObject;
-import de.markostreich.smarthome.switchdeviceapi.model.dto.SwitchObjectDto;
-import de.markostreich.smarthome.switchdeviceapi.model.repo.SwitchObjectRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @RestController
 @Profile("!testmode")
@@ -38,7 +38,7 @@ public class SwitchController {
 			@PathVariable(name = "device") final String deviceName) {
 		log.debug("Searching data for device '{}' ...", deviceName);
 		val device = deviceRepository.findByName(deviceName);
-		if (Objects.isNull(device)) {
+		if (isNull(device)) {
 			log.warn("Could not find device '{}'.", deviceName);
 			return ResponseEntity.notFound().build();
 		}
@@ -61,12 +61,12 @@ public class SwitchController {
 
 	@PostMapping(path = "/object", consumes = "application/json", produces = "application/json")
 	public ResponseEntity<SwitchObjectDto> addSwitchObject(
-			@RequestBody SwitchObjectDto switchObjectDto) {
+			@RequestBody final SwitchObjectDto switchObjectDto) {
 		log.info("Attempting to add switch object for device '{}'.",
 				switchObjectDto.deviceName());
 		log.info(switchObjectDto.toString());
 		val device = deviceRepository.findByName(switchObjectDto.deviceName());
-		if (Objects.isNull(device)) {
+		if (isNull(device)) {
 			log.warn("Could not find device '{}'.",
 					switchObjectDto.deviceName());
 			return ResponseEntity.notFound().build();
