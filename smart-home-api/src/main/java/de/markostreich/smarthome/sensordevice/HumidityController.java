@@ -33,7 +33,7 @@ public class HumidityController {
     private ResponseEntity<HumidityObjectDto> addHumidityObject(
             @RequestBody final HumidityObjectDto humidityObjectDto) {
         log.debug("Attempting to add Humidity Object for sensor device '{}'.", humidityObjectDto.deviceName());
-        log.debug(humidityObjectDto.toString());
+        log.info("Received humidity object: {}", humidityObjectDto);
         val device = deviceRepository.findByName(humidityObjectDto.deviceName());
         if (isNull(device)) {
             log.warn("Could not find device '{}'.", humidityObjectDto.deviceName());
