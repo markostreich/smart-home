@@ -1,6 +1,21 @@
-version: '3.8'
-
 services:
+  database:
+    image: postgres:18
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - database-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Smart home API
   smart-home-api:
     image: markostreichde/smart-home-api:latest
@@ -8,8 +23,15 @@ services:
     restart: always
     ports:
       - "8081:8080"
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
-      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/${DB_NAME:?Set DB_NAME in .env}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:?Set DB_USER in .env}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      SPRING_H2_CONSOLE_ENABLED: "false"
   
   # Smart home APP
   smart-home-app:
@@ -31,3 +53,6 @@ services:
       - WATCHTOWER_POLL_INTERVAL=60
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  database-data:

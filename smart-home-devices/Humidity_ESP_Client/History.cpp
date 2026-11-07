@@ -29,7 +29,7 @@ static void resetHistory() {
 
 bool initHistory() {
   if (!LittleFS.begin(false)) {
-    Serial.println("LittleFS konnte nicht gemountet werden. Versuche Formatierung.");
+    Serial.println("Could not mount LittleFS. Attempting to format.");
     if (!LittleFS.begin(true)) return false;
   }
   resetHistory();
@@ -42,14 +42,14 @@ bool initHistory() {
     if (n == sizeof(legacy) && legacy.magic == MAGIC && legacy.version == 2) {
       memcpy(historyData.slots, legacy.slots, sizeof(legacy.slots));
       memcpy(historyData.values, legacy.values, sizeof(legacy.values));
-      Serial.println("History v2 geladen; alte Temperaturwerte bleiben leer.");
+      Serial.println("Loaded history v2; previous temperature values remain empty.");
     } else {
-      Serial.println("Ungueltige History-Datei; neuer Verlauf.");
+      Serial.println("Invalid history file; starting a new history.");
     }
     return true;
   }
   if (f.size() != sizeof(historyData)) {
-    Serial.println("Alte/ungueltige History-Dateigroesse; neuer Verlauf.");
+    Serial.println("Old or invalid history file size; starting a new history.");
     f.close();
     return true;
   }
@@ -58,11 +58,11 @@ bool initHistory() {
   size_t n = f.read(reinterpret_cast<uint8_t*>(&restored), sizeof(restored));
   f.close();
   if (n != sizeof(restored) || restored.magic != MAGIC || restored.version != VERSION) {
-    Serial.println("Ungueltige History-Datei; neuer Verlauf.");
+    Serial.println("Invalid history file; starting a new history.");
     return true;
   }
   historyData = restored;
-  Serial.println("7-Tage-Verlauf aus LittleFS geladen.");
+  Serial.println("Loaded seven-day history from LittleFS.");
   return true;
 }
 
@@ -73,8 +73,8 @@ int64_t getCurrentSlot() {
   return static_cast<int64_t>(now) / Config::HISTORY_SECONDS;
 }
 
-// Nur HistoryTask schreibt LittleFS. Bei Stromausfall bleibt die alte Datei
-// normalerweise erhalten, weil erst temp geschrieben und dann umbenannt wird.
+// Only HistoryTask writes to LittleFS. On power failure, the old file
+// normally survives because a temporary file is written and then renamed.
 static bool persistHistory(const HistoryData& snapshot) {
   File f = LittleFS.open(TMP_PATH, "w");
   if (!f) return false;
@@ -85,7 +85,7 @@ static bool persistHistory(const HistoryData& snapshot) {
     LittleFS.remove(TMP_PATH);
     return false;
   }
-  // LittleFS rename ersetzt eine vorhandene Datei auf ESP32 normalerweise atomar.
+  // LittleFS rename normally replaces an existing file atomically on ESP32.
   if (!LittleFS.rename(TMP_PATH, FILE_PATH)) {
     LittleFS.remove(TMP_PATH);
     return false;
@@ -94,7 +94,7 @@ static bool persistHistory(const HistoryData& snapshot) {
 }
 
 void HistoryTask(void*) {
-  // Ein Snapshot wird nur von diesem Task verwendet; kein Stack-Array mit 8 KB.
+  // Only this task uses the snapshot; keep the large array off the stack.
   static HistoryData snapshot;
   for (;;) {
     const int64_t slot = getCurrentSlot();
@@ -113,10 +113,10 @@ void HistoryTask(void*) {
       }
       if (changed) {
         if (persistHistory(snapshot)) {
-          Serial.printf("Flash: Slot %lld gespeichert\n", (long long)slot);
+          Serial.printf("Flash: saved slot %lld\n", (long long)slot);
         } else {
-          Serial.println("FEHLER: Flash konnte nicht geschrieben werden!");
-          // Naechster Versuch in 1 s; RAM-Slot zuruecksetzen, wenn noch derselbe.
+          Serial.println("ERROR: Could not write to flash!");
+          // Retry in one second; reset the RAM slot if it is still the same.
           if (xSemaphoreTake(dataMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
             const int index = static_cast<int>(slot % Config::HISTORY_SIZE);
             if (historyData.slots[index] == slot) {

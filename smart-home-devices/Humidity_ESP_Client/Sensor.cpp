@@ -15,7 +15,7 @@ void SensorTask(void*) {
       xSemaphoreGive(dataMutex);
     }
     if (sample.valid) Serial.printf("DHT11: %.1f %% / %.1f C\n", h, t);
-    else Serial.println("DHT11: Lesefehler");
+    else Serial.println("DHT11: read error");
     vTaskDelayUntil(&wake, pdMS_TO_TICKS(Config::SENSOR_MS));
   }
 }
